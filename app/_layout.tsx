@@ -1,37 +1,35 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Stack } from "expo-router";
+import { Provider } from "react-redux";
+import { persistor, store } from "../redux/store";
+import { PersistGate } from "redux-persist/integration/react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
-  );
+   const [currentUser, setCurrentUser] = useState(null);
+   return (
+      <GestureHandlerRootView>
+         <PersistGate persistor={persistor}>
+            <Provider store={store}>
+               <Stack screenOptions={{ headerShown: false }}>
+                  {currentUser ? (
+                     <Stack.Screen
+                        name="(tabs)"
+                        options={{ headerShown: false }}
+                     />
+                  ) : (
+                     <Stack.Screen
+                        name="(auth)"
+                        options={{ headerShown: false }}
+                     />
+                  )}
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+               </Stack>
+            </Provider>
+         </PersistGate>
+      </GestureHandlerRootView>
+   );
 }
+
+const styles = StyleSheet.create({});
